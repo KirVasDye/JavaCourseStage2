@@ -1,9 +1,7 @@
-package org.example;
+package org.example.lesson1;
 
 
-import org.example.lesson1.CustomHashMap;
-
-public class Main {
+public class Demo {
 
     public static void main(String[] args) {
 
