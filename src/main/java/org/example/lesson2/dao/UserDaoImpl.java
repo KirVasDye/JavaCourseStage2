@@ -5,104 +5,83 @@ import org.example.lesson2.model.User;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
-public class UserDaoImpl implements UserDao {
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+@Slf4j
+public class UserDaoImpl extends BaseDao implements UserDao {
+
     @Override
     public void save(User user) {
 
-        Transaction transaction = null;
+        Objects.requireNonNull(user, "User не может быть null");
 
-        try (Session session =
-                     HibernateUtil.getSessionFactory().openSession()) {
+        executeInsideTransaction(
+                session -> {
+                    session.persist(user);
+                    log.info("Пользователь сохранен: {}", user);
+                }
+        );
 
-            transaction = session.beginTransaction();
-
-            session.persist(user);
-
-            transaction.commit();
-
-        } catch (Exception e) {
-
-            if (transaction != null) {
-                transaction.rollback();
-            }
-
-            System.out.println("Ошибка сохранения: " + e.getMessage());
-        }
     }
 
     @Override
     public User findById(Integer id) {
 
-        try (Session session =
-                     HibernateUtil.getSessionFactory().openSession()) {
+        Objects.requireNonNull(id, "ID не может быть null");
 
-            return session.get(User.class, id);
-        }
+        return executeWithResult(
+                session -> session.get(User.class, id)
+        );
     }
 
     @Override
     public List<User> findAll() {
+            log.info("Получение всех пользователей");
 
-        try (Session session =
-                     HibernateUtil.getSessionFactory().openSession()) {
-
-            return session
-                    .createQuery("from User", User.class)
-                    .list();
-        }
+            return executeWithResult(
+                    session ->
+                        session.createQuery(
+                                "from User",
+                                User.class
+                        )
+                                .list()
+            );
     }
 
     @Override
     public void update(User user) {
 
-        Transaction transaction = null;
+        Objects.requireNonNull(user, "User не может быть null");
 
-        try (Session session =
-                     HibernateUtil.getSessionFactory().openSession()) {
-
-            transaction = session.beginTransaction();
-
-            session.merge(user);
-
-            transaction.commit();
-
-        } catch (Exception e) {
-
-            if (transaction != null) {
-                transaction.rollback();
-            }
-
-            System.out.println("Ошибка обновления: " + e.getMessage());
-        }
+        executeInsideTransaction(
+                session -> {
+                    session.merge(user);
+                    log.info("Пользователь обновлен: {}", user);
+                }
+        );
     }
 
     @Override
     public void delete(Integer id) {
 
-        Transaction transaction = null;
+        Objects.requireNonNull(id, "ID не может быть null");
 
-        try (Session session =
-                     HibernateUtil.getSessionFactory().openSession()) {
-
-            transaction = session.beginTransaction();
-
+        executeInsideTransaction(session -> {
             User user = session.get(User.class, id);
 
             if (user != null) {
                 session.remove(user);
+
+                log.info("Пользователь удален: id={}", id);
+            } else {
+                log.warn("Пользователь не найден id={}", id);
             }
+        });
 
-            transaction.commit();
-
-        } catch (Exception e) {
-
-            if (transaction != null) {
-                transaction.rollback();
-            }
-
-            System.out.println("Ошибка удаления: " + e.getMessage());
-        }
     }
 }

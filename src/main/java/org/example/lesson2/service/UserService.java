@@ -14,6 +14,25 @@ public class UserService {
                            String name,
                            String email,
                            Integer age) {
+
+        if (id == null) {
+            throw new IllegalArgumentException(
+                    "id пользователя не может быть пустым"
+            );
+        }
+
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Имя пользователя не может быть пустым"
+            );
+        }
+
+        if (age == null || age < 0) {
+            throw new IllegalArgumentException(
+                    "Возраст указан некорректно"
+            );
+        }
+
         User user = User.builder()
                 .id(id)
                 .name(name)
