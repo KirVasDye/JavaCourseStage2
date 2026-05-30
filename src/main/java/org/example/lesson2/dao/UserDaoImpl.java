@@ -1,16 +1,12 @@
 package org.example.lesson2.dao;
 
-import org.example.lesson2.config.HibernateUtil;
 import org.example.lesson2.model.User;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
-import java.util.function.Function;
+
 
 @Slf4j
 public class UserDaoImpl extends BaseDao implements UserDao {
