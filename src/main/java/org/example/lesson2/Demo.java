@@ -1,5 +1,6 @@
 package org.example.lesson2;
 
+import org.example.lesson2.dao.UserDaoImpl;
 import org.example.lesson2.model.User;
 import org.example.lesson2.service.UserService;
 
@@ -11,7 +12,7 @@ public class Demo {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        UserService service = new UserService();
+        UserService service = new UserService(new UserDaoImpl());
 
         while (true) {
 
