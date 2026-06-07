@@ -123,7 +123,7 @@ public class UserServiceTest {
 
         List<User> users = List.of(
                 User.builder().id(1).name("Alex").email("alex@test.com").age(28).build(),
-                User.builder().id(2).name("John").email("lohn@test.com").age(27).build()
+                User.builder().id(2).name("John").email("john@test.com").age(27).build()
         );
 
         when(userDao.findAll())
