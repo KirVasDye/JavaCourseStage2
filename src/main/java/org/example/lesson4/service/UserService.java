@@ -1,44 +1,43 @@
 package org.example.lesson4.service;
 
-import jakarta.annotation.Nonnull;
+import dto.Operation;
+import dto.UserEvent;
 import lombok.RequiredArgsConstructor;
+import org.example.exception.UserNotFoundException;
 import org.example.lesson2.model.User;
 import org.example.lesson4.dto.CreateUserRequest;
 import org.example.lesson4.dto.UpdateUserRequest;
 import org.example.lesson4.dto.UserDto;
+import org.example.lesson4.dto.UserMapper;
 import org.example.lesson4.repository.UserRepository;
+import org.example.lesson5.producers.UserEventProducer;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@ComponentScan("org.example.lesson5.producers")
 public class UserService {
     private final UserRepository repository;
-
-    private UserDto toDto(@Nonnull User user) {
-        return new UserDto(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getAge(),
-                user.getCreatedAt()
-        );
-    }
+    private final UserMapper mapper;
+    private final UserEventProducer producer;
 
     public List<UserDto> getAll() {
         return repository.findAll()
                 .stream()
-                .map(this::toDto)
+                .map(mapper::toDto)
                 .toList();
     }
 
     public UserDto getById(Integer id) {
         User user = repository.findById(id)
-                .orElseThrow();
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        return toDto(user);
+        return mapper.toDto(user);
     }
 
     public UserDto create(CreateUserRequest request) {
@@ -50,23 +49,42 @@ public class UserService {
                 .createdAt(LocalDate.now())
                 .build();
 
-        return toDto(repository.save(user));
+        repository.save(user);
+
+        producer.send(
+                new UserEvent(
+                        Operation.CREATED,
+                        user.getEmail()
+                )
+        );
+
+        return mapper.toDto(user);
     }
 
     public UserDto update(Integer id,
                           UpdateUserRequest request) {
 
         User user = repository.findById(id)
-                .orElseThrow();
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        user.setName(request.name());
-        user.setEmail(request.email());
-        user.setAge(request.age());
+        mapper.updateEntity(user, request);
 
-        return toDto(repository.save(user));
+        return mapper.toDto(repository.save(user));
     }
 
+    @Transactional
     public void delete(Integer id) {
-        repository.deleteById(id);
+
+        User user = repository.findById(id)
+                        .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        repository.delete(user);
+
+        producer.send(
+                new UserEvent(
+                        Operation.DELETED,
+                        user.getEmail()
+                )
+        );
     }
 }
