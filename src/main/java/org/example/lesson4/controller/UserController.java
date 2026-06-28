@@ -10,6 +10,7 @@ import org.example.lesson4.service.UserService;
 import org.example.lesson6.UserModelAssembler;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -65,7 +66,8 @@ public class UserController {
 
     @Operation(summary = "Удалить пользователя")
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Integer id) {
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
         service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

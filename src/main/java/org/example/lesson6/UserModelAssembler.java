@@ -25,8 +25,8 @@ public class UserModelAssembler
                         .getAll())
                         .withRel("users"),
 
-                linkTo(UserController.class)
-                        .slash(dto.id())
+                linkTo(methodOn(UserController.class)
+                        .delete(dto.id()))
                         .withRel("delete"),
 
                 linkTo(methodOn(UserController.class)
