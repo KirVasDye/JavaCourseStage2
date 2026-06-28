@@ -49,8 +49,22 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
+    implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
+
     implementation(project(":common"))
 
+    implementation("org.springframework.cloud:spring-cloud-starter-config")
+
+}
+
+extra["springCloudVersion"] = "2025.0.0"
+
+dependencyManagement {
+    imports {
+        mavenBom(
+            "org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}"
+        )
+    }
 }
 
 tasks.test {
